@@ -1,34 +1,42 @@
-// [TAMBAHKAN FUNGSI INI KE code.gs.txt]
+// [GANTI SELURUH FUNGSI getDownloadLinkXLS DI code.gs.txt]
 
-/**
- * Mendapatkan link download .xlsx untuk sheet 'peserta'.
- * Dipanggil oleh admin dari halaman Hasil Ujian.
- */
 function getDownloadLinkXLS(sessionId) {
-  // 1. Validasi Sesi Admin
   const session = getUserSession(sessionId);
   if (!session.success || !session.data || session.data.role !== 'admin') {
     return { success: false, message: 'Akses ditolak.' };
   }
 
   try {
-    const ss = SpreadsheetApp.openById(SPREADSHEET_ID); [cite_start]// [cite: 537]
-    const sheet = ss.getSheetByName('peserta'); [cite_start]// [cite: 593, 642, 677, 753]
+    // 1. Buka Spreadsheet (Cek SPREADSHEET_ID)
+    const ss = SpreadsheetApp.openById(SPREADSHEET_ID); 
+    Logger.log('Spreadsheet berhasil dibuka dengan ID: ' + SPREADSHEET_ID);
+    
+    // 2. Dapatkan Sheet 'peserta' (Cek Nama Sheet)
+    // PASTIKAN NAMA INI SAMA PERSIS dengan sheet di Spreadsheet Anda
+    const SHEET_NAME = 'peserta'; // Ubah 'peserta' menjadi 'Peserta' jika P kapital
+    const sheet = ss.getSheetByName(SHEET_NAME); 
     
     if (!sheet) {
-      return { success: false, message: 'Sheet "peserta" tidak ditemukan.' }; [cite_start]// [cite: 754, 786]
+      Logger.log('ERROR: Sheet "' + SHEET_NAME + '" tidak ditemukan.');
+      return { success: false, message: 'Sheet "' + SHEET_NAME + '" tidak ditemukan. Pastikan nama sheet benar (case-sensitive).' };
     }
 
-    const sheetId = sheet.getSheetId(); // Dapatkan 'gid' (Grid ID)
+    // 3. Dapatkan Sheet ID (gid)
+    const sheetId = sheet.getSheetId(); 
+    Logger.log('Sheet "' + SHEET_NAME + '" ditemukan. Sheet ID (gid): ' + sheetId);
     
-    // 2. Buat URL ekspor .xlsx
+    // 4. Buat URL ekspor .xlsx
+    // Ini adalah format URL standar untuk download .xlsx dari Google Sheets
     const url = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/export?format=xlsx&gid=${sheetId}`;
     
-    // 3. Kembalikan URL ke frontend
+    Logger.log('Generated URL: ' + url);
+    
+    // 5. Kembalikan URL
     return { success: true, url: url };
 
   } catch (e) {
-    Logger.log('Error in getDownloadLinkXLS: ' + e.message);
-    return { success: false, message: 'Gagal membuat link download: ' + e.message };
+    // Tangkap error jika ada masalah saat membuka SS atau Sheet
+    Logger.log('Error in getDownloadLinkXLS: ' + e.message + ' Stack: ' + e.stack);
+    return { success: false, message: 'Terjadi kesalahan server saat membuat link: ' + e.message };
   }
 }
