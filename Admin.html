@@ -1,0 +1,24 @@
+//Di file Admin.html, tambahkan HTML untuk modal baru ini. Anda bisa meletakkannya di bagian bawah file, dekat dengan modal-modal lainnya
+
+<div class="modal" id="modalRekapEsai">
+    <div class="modal-content" style="max-width: 800px;">
+      <div class="modal-header">
+        <h3 class="modal-title">Pratinjau Jawaban Esai</h3>
+        <button class="close-modal" onclick="closeModal('modalRekapEsai')">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div id="rekapEsaiContent" style="max-height: 70vh; overflow-y: auto; padding-top: 1rem;">
+        <div class="empty-state">
+          <i class="fas fa-spinner fa-spin"></i>
+          <p>Memuat jawaban...</p>
+        </div>
+      </div>
+      <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+        <button type="button" class="btn btn-primary" onclick="closeModal('modalRekapEsai')" style="flex: 1;">
+            <i class="fas fa-check"></i>
+            Tutup
+        </button>
+      </div>
+    </div>
+  </div>
