@@ -38,6 +38,8 @@ align-items: center; gap: 1rem;">
 
 // [TAMBAHKAN FUNGSI INI KE <script> di Admin.html.txt]
 
+// [GANTI SELURUH FUNGSI downloadHasilXLS() DI Admin.html.txt]
+
 function downloadHasilXLS() {
   // Tampilkan loading
   showLoading('Mempersiapkan link download...');
@@ -47,19 +49,30 @@ function downloadHasilXLS() {
   google.script.run
     .withSuccessHandler(response => {
       hideLoading();
-      if (response.success) {
+      if (response.success && response.url) {
         showToast('Link download berhasil dibuat. Download akan dimulai.', 'success');
         
-        // Buka URL di tab baru. Browser akan otomatis mengunduh file .xlsx
-        window.open(response.url, '_blank'); 
+        // --- PERBAIKAN: Menggunakan elemen <a> temporer ---
+        const downloadLink = document.createElement('a');
+        downloadLink.href = response.url;
+        downloadLink.target = '_blank'; // Buka di tab baru
+        downloadLink.style.display = 'none';
+        
+        // Tambahkan link ke DOM, klik, lalu hapus
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+        document.body.removeChild(downloadLink);
+        // --------------------------------------------------
+        
       } else {
         // Tampilkan error jika gagal
-        showToast(response.message, 'error');
+        showToast(response.message || 'Gagal membuat link download.', 'error');
       }
     })
     .withFailureHandler(err => {
       hideLoading();
-      showToast(err.message, 'error');
+      // Ini akan menangkap error dari Apps Script (Backend)
+      showToast('Error Server (Backend): ' + err.message, 'error');
     })
     .getDownloadLinkXLS(sessionId);
 }
