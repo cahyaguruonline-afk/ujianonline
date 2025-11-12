@@ -22,3 +22,81 @@
       </div>
     </div>
   </div>
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Di dalam <script> di Admin.html
+
+          // =================== MODIFIKASI DI SINI ===================
+          // Ganti baris ini:
+          // Tambah tombol Aksi
+          rowHtml += `<td>
+              <button class="btn btn-sm btn-warning" onclick="requestRetakeExam('${noPeserta}')"><i class="fas fa-redo"></i> Ujian Ulang</button>
+            </td>
+          `;
+
+          
+          // Menjadi 2 tombol:
+          // Tambah tombol Aksi
+          rowHtml += `<td style="display: flex; gap: 0.5rem;">
+              <button class="btn btn-sm btn-info" onclick="showEsaiModal('${noPeserta}')"><i class="fas fa-comment-dots"></i> Lihat Esai</button>
+              <button class="btn btn-sm btn-warning" onclick="requestRetakeExam('${noPeserta}')"><i class="fas fa-redo"></i> Ujian Ulang</button>
+            </td>
+          `;
+          // =================== AKHIR MODIFIKASI ===================
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// [TAMBAHKAN FUNGSI INI KE <script> di Admin.html.txt]
+
+function showEsaiModal(noPeserta) {
+  const modal = document.getElementById('modalRekapEsai');
+  const contentDiv = document.getElementById('rekapEsaiContent');
+  
+  // 1. Tampilkan modal dengan status loading
+  contentDiv.innerHTML = '<div class="empty-state"><i class="fas fa-spinner fa-spin"></i><p>Memuat jawaban...</p></div>';
+  modal.classList.add('active');
+
+  const sessionId = sessionStorage.getItem('sessionId');
+  
+  // 2. Panggil fungsi backend baru
+  google.script.run
+    .withSuccessHandler(response => {
+      if (response.success && response.data.length > 0) {
+        contentDiv.innerHTML = ''; // Kosongkan area konten
+        
+        // 3. Tampilkan setiap pasangan pertanyaan & jawaban
+        response.data.forEach(item => {
+          const esaiItem = `
+            <div class="form-group" style="margin-bottom: 1.5rem; border-bottom: 1px solid var(--border); padding-bottom: 1rem;">
+              <label class="form-label" style="color: var(--primary); font-size: 0.8em; text-transform: uppercase;">
+                <strong>${item.mapel}</strong>
+              </label>
+              
+              <div style="padding: 1rem; background: var(--light); border-radius: 10px; color: var(--dark); font-size: 0.9em; margin-top: 0.5rem;">
+                <strong style="color: var(--primary-dark);">Soal:</strong>
+                <p style="margin: 0; padding-top: 5px;">${item.pertanyaan}</p>
+              </div>
+              
+              <div style="padding: 1rem; background: #fff; border: 1px solid var(--border); border-radius: 10px; color: var(--dark); font-size: 0.9em; margin-top: 0.5rem;">
+                <strong style="color: #d97706;">Jawaban Peserta:</strong>
+                <p style="margin: 0; padding-top: 5px;">${item.jawaban}</p>
+              </div>
+            </div>
+          `;
+          contentDiv.innerHTML += esaiItem;
+        });
+      } else if (response.success && response.data.length === 0) {
+         contentDiv.innerHTML = '<div class="empty-state"><i class="fas fa-comment-slash"></i><p>Peserta ini tidak memiliki jawaban esai.</p></div>';
+      } else {
+        // Handle error jika gagal
+        contentDiv.innerHTML = `<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><p>${response.message}</p></div>`;
+        showToast(response.message, 'error');
+      }
+    })
+    .withFailureHandler(err => {
+      contentDiv.innerHTML = `<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><p>${err.message}</p></div>`;
+      showToast(err.message, 'error');
+    })
+    .getDetailEsaiPeserta(sessionId, noPeserta);
+}
