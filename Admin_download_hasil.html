@@ -1,4 +1,4 @@
-//Rubah Script di Bawah
+///////////////Rubah Script di Bawah///////////////////////
 <div class="table-header">
               <h3 class="table-title">Rekap Hasil Ujian</h3>
               <div style="display: flex;
@@ -13,4 +13,53 @@ align-items: center; gap: 1rem;">
                 </button>
               </div>
             </div>
-            
+
+// Menjadi
+<div class="table-header">
+              <h3 class="table-title">Rekap Hasil Ujian</h3>
+              <div style="display: flex; align-items: center; gap: 1rem;">
+                <button class="btn btn-success" onclick="loadHasil()">
+                  <i class="fas fa-sync"></i>
+                  Refresh
+                </button>
+                
+                <button class="btn" onclick="downloadHasilXLS()" style="background: linear-gradient(135deg, #10b981, #059669); color: white;">
+                  <i class="fas fa-file-excel"></i>
+                  Download XLS
+                </button>
+                <button id="btnSimpanEsai" class="btn btn-primary" onclick="simpanNilaiEsai()">
+                   <i class="fas fa-save"></i>
+                  Simpan Nilai Esai
+                </button>
+              </div>
+            </div>
+///////////////SELESAI///////////////////////
+
+
+// [TAMBAHKAN FUNGSI INI KE <script> di Admin.html.txt]
+
+function downloadHasilXLS() {
+  // Tampilkan loading
+  showLoading('Mempersiapkan link download...');
+  const sessionId = sessionStorage.getItem('sessionId');
+
+  // Panggil fungsi backend baru
+  google.script.run
+    .withSuccessHandler(response => {
+      hideLoading();
+      if (response.success) {
+        showToast('Link download berhasil dibuat. Download akan dimulai.', 'success');
+        
+        // Buka URL di tab baru. Browser akan otomatis mengunduh file .xlsx
+        window.open(response.url, '_blank'); 
+      } else {
+        // Tampilkan error jika gagal
+        showToast(response.message, 'error');
+      }
+    })
+    .withFailureHandler(err => {
+      hideLoading();
+      showToast(err.message, 'error');
+    })
+    .getDownloadLinkXLS(sessionId);
+}
