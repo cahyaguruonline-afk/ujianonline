@@ -1,4 +1,4 @@
-// [TAMBAHKAN FUNGSI INI KE code.gs.txt]
+// [FUNGSI KOREKSI ESAI DITAMBAH KE code.gs]
 
 /**
  * Mengambil detail pertanyaan dan jawaban esai untuk seorang peserta.
